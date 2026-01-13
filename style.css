@@ -8,8 +8,15 @@ body{
 }
 .wrap{ width:min(980px,94vw); padding:22px 14px 26px; }
 .head{ text-align:center; margin-bottom:14px; }
-.head h1{ margin:0 0 6px; font-size:clamp(20px,3.2vw,34px); }
+.head h1{ margin:10px 0 6px; font-size:clamp(20px,3.2vw,34px); }
 .head p{ margin:0; color:var(--muted); }
+
+.logo{
+  width: 140px;
+  height: auto;
+  display: block;
+  margin: 0 auto 8px;
+}
 
 .wheel-area{ position:relative; display:grid; place-items:center; margin:18px auto 10px; }
 canvas{
@@ -48,7 +55,3 @@ button:disabled{ opacity:.6; cursor:not-allowed; }
 .result .text{ font-size:18px; font-weight:900; }
 .note{ color:var(--muted); text-align:center; }
 .foot{ margin-top:18px; text-align:center; color:var(--muted); font-size:12px; }
-.logo{
-  width: 120px;        /* Logo 大小，可改 100 / 140 */
-  margin-bottom: 10px;
-}
