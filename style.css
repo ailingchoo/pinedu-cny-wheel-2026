@@ -48,3 +48,7 @@ button:disabled{ opacity:.6; cursor:not-allowed; }
 .result .text{ font-size:18px; font-weight:900; }
 .note{ color:var(--muted); text-align:center; }
 .foot{ margin-top:18px; text-align:center; color:var(--muted); font-size:12px; }
+.logo{
+  width: 120px;        /* Logo 大小，可改 100 / 140 */
+  margin-bottom: 10px;
+}
