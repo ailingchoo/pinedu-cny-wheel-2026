@@ -1,5 +1,5 @@
 const prizes = ["RM8", "RM18", "RM28", "RM58", "RM88 🏆大奖"];
-const weights = [45, 30, 15, 8, 2]; // RM88 = 2% 很难中
+const weights = [45, 30, 15, 8, 2];
 
 const STORAGE_KEY = "PINEDU_CNY_WHEEL_SPUN_V2";
 const WIN_KEY = "PINEDU_CNY_WHEEL_WIN_V2";
@@ -27,7 +27,6 @@ function hashToColor(str) {
 
 function drawWheel() {
   ctx.clearRect(0, 0, W, H);
-
   const n = prizes.length;
   const arc = (Math.PI * 2) / n;
 
@@ -106,8 +105,7 @@ function spin() {
   if (spinning) return;
 
   if (localStorage.getItem(STORAGE_KEY) === "1") {
-    const savedPrize = localStorage.getItem(WIN_KEY) || "（已抽奖）";
-    lockUIWithPrize(savedPrize);
+    lockUIWithPrize(localStorage.getItem(WIN_KEY) || "（已抽奖）");
     return;
   }
 
@@ -127,18 +125,14 @@ function spin() {
   const duration = 4200;
   const start = performance.now();
 
-  function easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3);
-  }
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
   function animate(now) {
     const t = Math.min(1, (now - start) / duration);
     rotation = startRotation + delta * easeOutCubic(t);
     drawWheel();
-
-    if (t < 1) {
-      requestAnimationFrame(animate);
-    } else {
+    if (t < 1) requestAnimationFrame(animate);
+    else {
       spinning = false;
       rotation = ((rotation % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2);
       drawWheel();
@@ -146,11 +140,9 @@ function spin() {
       const prize = prizes[winnerIndex];
       localStorage.setItem(STORAGE_KEY, "1");
       localStorage.setItem(WIN_KEY, prize);
-
       lockUIWithPrize(prize);
     }
   }
-
   requestAnimationFrame(animate);
 }
 
