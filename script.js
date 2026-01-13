@@ -2,16 +2,16 @@
 // 奖项 & 权重
 // =======================
 const prizes = ["RM8", "RM18", "RM28", "RM58", "RM88 🏆大奖"];
-const weights = [45, 30, 15, 8, 2]; // RM88 很难中
+const weights = [45, 30, 15, 8, 2];
 
 // =======================
-// 只能转一次（localStorage）
+// 只能转一次
 // =======================
-const STORAGE_KEY = "PINEDU_CNY_WHEEL_SPUN_FINAL";
-const WIN_KEY = "PINEDU_CNY_WHEEL_WIN_FINAL";
+const STORAGE_KEY = "PINEDU_WHEEL_SPUN_FINAL";
+const WIN_KEY = "PINEDU_WHEEL_WIN_FINAL";
 
 // =======================
-// Canvas 元素
+// Canvas
 // =======================
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
@@ -28,7 +28,7 @@ let rotation = 0;
 let spinning = false;
 
 // =======================
-// 载入 Logo（根目录 logo.png）
+// Logo
 // =======================
 const logoImg = new Image();
 logoImg.src = "logo.png";
@@ -36,33 +36,27 @@ logoImg.onload = () => drawWheel();
 logoImg.onerror = () => drawWheel();
 
 // =======================
-// 颜色函数（稳定分配）
+// 扇形颜色
 // =======================
 function hashToColor(str) {
   let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  }
-  const r = 120 + (h % 90);
-  const g = 120 + ((h >> 8) % 90);
-  const b = 120 + ((h >> 16) % 90);
-  return `rgb(${r},${g},${b})`;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return `rgb(${120 + (h % 90)}, ${120 + ((h >> 8) % 90)}, ${120 + ((h >> 16) % 90)})`;
 }
 
 // =======================
-// 环绕文字：只画一次（4字绕一圈）
+// 只画一次的环绕字（4字）
 // =======================
-function drawCircularOnce(text, x, y, r, startAngle = -Math.PI / 2) {
+function drawCircularOnce(text, r, start = -Math.PI / 2) {
   ctx.save();
-  ctx.translate(x, y);
   ctx.font = "900 14px system-ui, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,.92)";
+  ctx.fillStyle = "rgba(255,255,255,.95)";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
   const chars = [...text];
-  const step = (Math.PI * 2) / chars.length; // 4个字 = 每90度一个
-  let angle = startAngle;
+  const step = (Math.PI * 2) / chars.length;
+  let angle = start;
 
   for (const ch of chars) {
     ctx.save();
@@ -77,11 +71,10 @@ function drawCircularOnce(text, x, y, r, startAngle = -Math.PI / 2) {
 }
 
 // =======================
-// 绘制转盘
+// 画转盘
 // =======================
 function drawWheel() {
   ctx.clearRect(0, 0, W, H);
-
   const n = prizes.length;
   const arc = (Math.PI * 2) / n;
 
@@ -91,35 +84,32 @@ function drawWheel() {
 
   // 扇形
   for (let i = 0; i < n; i++) {
-    const start = i * arc;
-    const end = start + arc;
-
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.arc(0, 0, radius, start, end);
+    ctx.arc(0, 0, radius, i * arc, (i + 1) * arc);
     ctx.closePath();
     ctx.fillStyle = hashToColor(prizes[i]);
     ctx.fill();
-
-    ctx.strokeStyle = "rgba(255,255,255,.75)";
+    ctx.strokeStyle = "rgba(255,255,255,.7)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx.save();
-    ctx.rotate(start + arc / 2);
+    ctx.rotate(i * arc + arc / 2);
     ctx.textAlign = "right";
-    ctx.fillStyle = "rgba(17,24,39,.95)";
-    ctx.font = "900 19px system-ui, sans-serif";
-    ctx.fillText(prizes[i], radius - 16, 7);
+    ctx.fillStyle = "#111827";
+    ctx.font = "900 19px system-ui";
+    ctx.fillText(prizes[i], radius - 16, 6);
     ctx.restore();
   }
 
   // =======================
-  // 高级中心区域（大圆 + 金框 + 发光）
+  // 中心高级区域
   // =======================
   const centerR = 92;
-  const logoClipR = 54;
+  const logoR = 54;
   const logoSize = 110;
+  const logoY = -6;
 
   // 底圆
   ctx.beginPath();
@@ -138,33 +128,31 @@ function drawWheel() {
   ctx.stroke();
   ctx.restore();
 
-  // 金色细框
+  // 金色边框
   ctx.beginPath();
   ctx.arc(0, 0, centerR, 0, Math.PI * 2);
   ctx.strokeStyle = "rgba(255,210,110,.95)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // Logo（稍微上移一点点更居中）
-  const logoY = -6;
+  // Logo
   ctx.save();
   ctx.beginPath();
-  ctx.arc(0, logoY, logoClipR, 0, Math.PI * 2);
+  ctx.arc(0, logoY, logoR, 0, Math.PI * 2);
   ctx.clip();
   try {
     ctx.drawImage(logoImg, -logoSize / 2, logoY - logoSize / 2, logoSize, logoSize);
-  } catch (e) {}
+  } catch {}
   ctx.restore();
 
-  // ✅ 只出现一次「马年好运」围绕 logo
-  // r 控制距离：68更贴近，74更外圈
-  drawCircularOnce("马年好运", 0, logoY, 72, -Math.PI / 2);
+  // ✅ 只出现一次的「马年好运」
+  drawCircularOnce("马年好运", 72);
 
   ctx.restore();
 }
 
 // =======================
-// 权重抽奖
+// 抽奖逻辑
 // =======================
 function pickIndexByWeight(ws) {
   const total = ws.reduce((a, b) => a + b, 0);
@@ -179,70 +167,54 @@ function pickIndexByWeight(ws) {
 function angleToIndex(index) {
   const arc = (Math.PI * 2) / prizes.length;
   const centerAngle = index * arc + arc / 2;
-  const pointerAngle = -Math.PI / 2;
-  let target = pointerAngle - centerAngle;
-  return ((target % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  const pointer = -Math.PI / 2;
+  return ((pointer - centerAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
 }
 
-// =======================
-// 转动逻辑
-// =======================
 function lockUI(prize) {
   spinBtn.disabled = true;
-  resultText.textContent = `✅ 抽奖完成：🎉 ${prize}`;
+  resultText.textContent = `🎉 抽中：${prize}`;
 }
 
 function spin() {
   if (spinning) return;
 
-  if (localStorage.getItem(STORAGE_KEY) === "1") {
-    lockUI(localStorage.getItem(WIN_KEY) || "");
+  if (localStorage.getItem(STORAGE_KEY)) {
+    lockUI(localStorage.getItem(WIN_KEY));
     return;
   }
 
   spinning = true;
   spinBtn.disabled = true;
-  resultText.textContent = "转盘旋转中… 🎡";
+  resultText.textContent = "转盘旋转中…";
 
-  const winner = pickIndexByWeight(weights);
-  const target = angleToIndex(winner);
-  const finalRotation = target + (7 + Math.floor(Math.random() * 2)) * Math.PI * 2;
+  const win = pickIndexByWeight(weights);
+  const target = angleToIndex(win) + (7 + Math.floor(Math.random() * 2)) * Math.PI * 2;
 
-  const startRotation = rotation;
-  const delta = finalRotation - startRotation;
-  const duration = 4200;
-  const start = performance.now();
+  const start = rotation;
+  const delta = target - start;
+  const t0 = performance.now();
 
-  function easeOut(t) {
-    return 1 - Math.pow(1 - t, 3);
-  }
-
-  function animate(now) {
-    const t = Math.min(1, (now - start) / duration);
-    rotation = startRotation + delta * easeOut(t);
+  function animate(t) {
+    const p = Math.min(1, (t - t0) / 4200);
+    rotation = start + delta * (1 - Math.pow(1 - p, 3));
     drawWheel();
-
-    if (t < 1) {
-      requestAnimationFrame(animate);
-    } else {
+    if (p < 1) requestAnimationFrame(animate);
+    else {
       spinning = false;
-      drawWheel();
-      const prize = prizes[winner];
+      const prize = prizes[win];
       localStorage.setItem(STORAGE_KEY, "1");
       localStorage.setItem(WIN_KEY, prize);
       lockUI(prize);
     }
   }
-
   requestAnimationFrame(animate);
 }
 
 spinBtn.addEventListener("click", spin);
-
-// 初始载入
 drawWheel();
-if (localStorage.getItem(STORAGE_KEY) === "1") {
-  lockUI(localStorage.getItem(WIN_KEY) || "");
-}
 
+if (localStorage.getItem(STORAGE_KEY)) {
+  lockUI(localStorage.getItem(WIN_KEY));
+}
 
