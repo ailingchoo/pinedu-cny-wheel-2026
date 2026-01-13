@@ -2,16 +2,16 @@
 // 奖项 & 权重
 // =======================
 const prizes = ["RM8", "RM18", "RM28", "RM58", "RM88 🏆大奖"];
-const weights = [45, 30, 15, 8, 2];
+const weights = [45, 30, 15, 8, 2]; // RM88 很难中
 
-// 轮盘上显示（避免太长）
-const wheelLabels = ["RM8", "RM18", "RM28", "RM58", "RM88"];
+// ✅ 轮盘上也显示完整版（你要 RM88 后面字回来）
+const wheelLabels = ["RM8", "RM18", "RM28", "RM58", "RM88 🏆大奖"];
 
 // =======================
 // 只能转一次
 // =======================
-const STORAGE_KEY = "PINEDU_WHEEL_SPUN_FINAL_V3";
-const WIN_KEY = "PINEDU_WHEEL_WIN_FINAL_V3";
+const STORAGE_KEY = "PINEDU_WHEEL_SPUN_FINAL_V4";
+const WIN_KEY = "PINEDU_WHEEL_WIN_FINAL_V4";
 
 // =======================
 // Canvas
@@ -48,20 +48,19 @@ function hashToColor(str) {
 }
 
 // =======================
-// 描边文字（更清楚）
+// 描边文字（清楚但字小一点）
 // =======================
-function drawTextOutlined(text, x, y, fontSize = 20) {
+function drawTextOutlined(text, x, y, fontSize = 18) {
   ctx.save();
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
   ctx.font = `900 ${fontSize}px system-ui`;
 
-  // 描边 + 阴影，盖在上层也清楚
-  ctx.shadowColor = "rgba(0,0,0,.35)";
-  ctx.shadowBlur = 6;
+  ctx.shadowColor = "rgba(0,0,0,.25)";
+  ctx.shadowBlur = 4;
 
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "rgba(255,255,255,.9)";
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "rgba(255,255,255,.85)";
   ctx.strokeText(text, x, y);
 
   ctx.fillStyle = "#111827";
@@ -70,13 +69,11 @@ function drawTextOutlined(text, x, y, fontSize = 20) {
 }
 
 function drawCenter() {
-  // ✅ 中心再缩小一点，给奖项文字更多空间
+  // ✅ 中心保持不挡字：稍小
   const centerR = 70;
   const logoR = 46;
   const logoSize = 92;
-
-  // ✅ Logo 往下，给“马年好运”位置
-  const logoY = 14;
+  const logoY = 12;
 
   // 底圆
   ctx.beginPath();
@@ -84,13 +81,13 @@ function drawCenter() {
   ctx.fillStyle = "rgba(17,24,39,.92)";
   ctx.fill();
 
-  // 金色发光
+  // 金色发光（淡一点）
   ctx.save();
-  ctx.shadowColor = "rgba(255,215,120,.55)";
-  ctx.shadowBlur = 16;
+  ctx.shadowColor = "rgba(255,215,120,.5)";
+  ctx.shadowBlur = 14;
   ctx.beginPath();
   ctx.arc(0, 0, centerR + 2, 0, Math.PI * 2);
-  ctx.strokeStyle = "rgba(255,215,120,.55)";
+  ctx.strokeStyle = "rgba(255,215,120,.5)";
   ctx.lineWidth = 3;
   ctx.stroke();
   ctx.restore();
@@ -102,15 +99,15 @@ function drawCenter() {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // ✅ 马年好运：放在 logo 上方、不会被挡（更大）
+  // ✅ 马年好运：字小一点
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "900 26px system-ui";
-  ctx.shadowColor = "rgba(0,0,0,.55)";
-  ctx.shadowBlur = 8;
-  ctx.lineWidth = 6;
-  ctx.strokeStyle = "rgba(0,0,0,.55)";
+  ctx.font = "900 20px system-ui"; // 原本 26，改小
+  ctx.shadowColor = "rgba(0,0,0,.45)";
+  ctx.shadowBlur = 6;
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "rgba(0,0,0,.5)";
   ctx.strokeText("马年好运", 0, -28);
   ctx.fillStyle = "rgba(255,255,255,.98)";
   ctx.fillText("马年好运", 0, -28);
@@ -135,9 +132,8 @@ function drawLabelsOnTop() {
     ctx.save();
     ctx.rotate(i * arc + arc / 2);
 
-    // ✅ 再往外一点，保证永远不被中心挡
-    // 数值越大越靠外：radius - 4 / radius - 0
-    drawTextOutlined(wheelLabels[i], radius - 2, 8, 22);
+    // ✅ 字小一点 + 更靠外一点（避免长字被挡）
+    drawTextOutlined(wheelLabels[i], radius - 2, 7, 18);
 
     ctx.restore();
   }
@@ -156,7 +152,7 @@ function drawWheel() {
   ctx.translate(cx, cy);
   ctx.rotate(rotation);
 
-  // 1) 先画扇形（不画文字）
+  // 1) 扇形底色
   for (let i = 0; i < n; i++) {
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -170,10 +166,10 @@ function drawWheel() {
     ctx.stroke();
   }
 
-  // 2) 再画中心（会盖到里面的区域没关系）
+  // 2) 中心
   drawCenter();
 
-  // 3) 最后再把奖项文字画一次（盖在最上面，永远不会被挡）
+  // 3) 最后画奖项文字（最上层）
   drawLabelsOnTop();
 
   ctx.restore();
@@ -230,7 +226,7 @@ function spin() {
     if (p < 1) requestAnimationFrame(animate);
     else {
       spinning = false;
-      const prize = prizes[win];
+      const prize = prizes[win]; // ✅ 结果显示完整版
       localStorage.setItem(STORAGE_KEY, "1");
       localStorage.setItem(WIN_KEY, prize);
       lockUI(prize);
@@ -245,4 +241,3 @@ drawWheel();
 if (localStorage.getItem(STORAGE_KEY)) {
   lockUI(localStorage.getItem(WIN_KEY));
 }
-
