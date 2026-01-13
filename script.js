@@ -22,7 +22,7 @@ const W = canvas.width;
 const H = canvas.height;
 const cx = W / 2;
 const cy = H / 2;
-const radius = Math.min(W, H) / 2 - 10;
+const radius = Math.min(W, H) / 2 - 6; // 🔑 稍微放大，避免挡 RM88
 
 let rotation = 0;
 let spinning = false;
@@ -45,32 +45,6 @@ function hashToColor(str) {
 }
 
 // =======================
-// 只画一次的环绕字（4字）
-// =======================
-function drawCircularOnce(text, r, start = -Math.PI / 2) {
-  ctx.save();
-  ctx.font = "900 14px system-ui, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,.95)";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  const chars = [...text];
-  const step = (Math.PI * 2) / chars.length;
-  let angle = start;
-
-  for (const ch of chars) {
-    ctx.save();
-    ctx.rotate(angle);
-    ctx.translate(0, -r);
-    ctx.rotate(-angle);
-    ctx.fillText(ch, 0, 0);
-    ctx.restore();
-    angle += step;
-  }
-  ctx.restore();
-}
-
-// =======================
 // 画转盘
 // =======================
 function drawWheel() {
@@ -82,7 +56,7 @@ function drawWheel() {
   ctx.translate(cx, cy);
   ctx.rotate(rotation);
 
-  // 扇形
+  // ===== 扇形 =====
   for (let i = 0; i < n; i++) {
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -90,6 +64,7 @@ function drawWheel() {
     ctx.closePath();
     ctx.fillStyle = hashToColor(prizes[i]);
     ctx.fill();
+
     ctx.strokeStyle = "rgba(255,255,255,.7)";
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -99,17 +74,17 @@ function drawWheel() {
     ctx.textAlign = "right";
     ctx.fillStyle = "#111827";
     ctx.font = "900 19px system-ui";
-    ctx.fillText(prizes[i], radius - 16, 6);
+    ctx.fillText(prizes[i], radius - 18, 6);
     ctx.restore();
   }
 
   // =======================
-  // 中心高级区域
+  // 中心高级区域（缩小一点，避免挡奖项）
   // =======================
-  const centerR = 92;
-  const logoR = 54;
-  const logoSize = 110;
-  const logoY = -6;
+  const centerR = 82;      // 🔑 原本更大，这里缩小
+  const logoR = 52;
+  const logoSize = 104;
+  const logoY = 6;        // logo 稍微下移，给文字空间
 
   // 底圆
   ctx.beginPath();
@@ -120,7 +95,7 @@ function drawWheel() {
   // 金色发光
   ctx.save();
   ctx.shadowColor = "rgba(255,215,120,.55)";
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur = 16;
   ctx.beginPath();
   ctx.arc(0, 0, centerR + 2, 0, Math.PI * 2);
   ctx.strokeStyle = "rgba(255,215,120,.55)";
@@ -135,18 +110,27 @@ function drawWheel() {
   ctx.lineWidth = 2;
   ctx.stroke();
 
+  // ===== 马年好运（直接叠在 Logo 上面）=====
+  ctx.fillStyle = "rgba(255,255,255,.96)";
+  ctx.textAlign = "center";
+  ctx.font = "900 18px system-ui"; // 🔑 字变大
+  ctx.fillText("马年好运", 0, -28);
+
   // Logo
   ctx.save();
   ctx.beginPath();
   ctx.arc(0, logoY, logoR, 0, Math.PI * 2);
   ctx.clip();
   try {
-    ctx.drawImage(logoImg, -logoSize / 2, logoY - logoSize / 2, logoSize, logoSize);
+    ctx.drawImage(
+      logoImg,
+      -logoSize / 2,
+      logoY - logoSize / 2,
+      logoSize,
+      logoSize
+    );
   } catch {}
   ctx.restore();
-
-  // ✅ 只出现一次的「马年好运」
-  drawCircularOnce("马年好运", 72);
 
   ctx.restore();
 }
