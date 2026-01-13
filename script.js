@@ -23,15 +23,9 @@ let spinning = false;
 const logoImg = new Image();
 logoImg.src = "logo.png";
 logoImg.onload = () => drawWheel();
-logoImg.onerror = () => drawWheel(); // 如果 logo 找不到，也不会卡死
+logoImg.onerror = () => drawWheel();
 
-// （可选）如果你之后上传 horse.png，就会自动用图片；没上传就用🐴
-const horseImg = new Image();
-horseImg.src = "horse.png";
-let horseImgReady = false;
-horseImg.onload = () => { horseImgReady = true; drawWheel(); };
-horseImg.onerror = () => { horseImgReady = false; drawWheel(); };
-
+// ====== 颜色：每个奖项稳定分配一种颜色 ======
 function hashToColor(str) {
   let h = 0;
   for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
@@ -87,38 +81,31 @@ function drawWheel() {
   ctx.stroke();
 
   // ====== 中心：放 Logo（圆形裁切）======
-  const logoSize = 86; // 调大/调小可改这里：80~100
+  const logoSize = 86; // 80~100
   ctx.save();
   ctx.beginPath();
-  ctx.arc(0, 0, 42, 0, Math.PI * 2); // 裁切成圆
+  ctx.arc(0, 0, 42, 0, Math.PI * 2);
   ctx.clip();
-
-  // 尝试画 logo（若没载入成功，会跳过）
   try {
     ctx.drawImage(logoImg, -logoSize / 2, -logoSize / 2, logoSize, logoSize);
   } catch (e) {}
   ctx.restore();
 
-  // ====== 马年元素（默认用🐴+马年；如果你上传 horse.png 会自动用图）======
-  if (horseImgReady) {
-    const s = 34;
-    ctx.save();
-    ctx.globalAlpha = 0.95;
-    ctx.drawImage(horseImg, -s / 2, 38, s, s);
-    ctx.restore();
-  } else {
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-
-    ctx.font = "800 18px system-ui, sans-serif";
-    ctx.fillText("🐴 马年", 0, 58); // 想改成“新年快乐”也可以
-  }
-
-  // ====== 中心小字（品牌/提示）======
-  ctx.fillStyle = "rgba(255,255,255,.92)";
+  // ====== 中心祝福文字（无马emoji，更干净）======
+  ctx.fillStyle = "rgba(255,255,255,.95)";
   ctx.textAlign = "center";
+  ctx.font = "800 14px system-ui, sans-serif";
+  ctx.fillText("马年好运", 0, 56);
+  ctx.font = "600 11px system-ui, sans-serif";
+  ctx.fillText("新春快乐 · 品教育", 0, 72);
+
+  // ====== 提示 ======
+  ctx.fillStyle = "rgba(255,255,255,.85)";
   ctx.font = "700 11px system-ui, sans-serif";
-  ctx.fillText("只限一次抽奖", 0, 86);
+  ctx.fillText("只限一次抽奖", 0, 88);
+
+  ctx.restore(); // 结束 translate/rotate
+} // ✅ 这里结束 drawWheel
 
 // ====== 权重抽奖 ======
 function pickIndexByWeight(ws) {
@@ -149,6 +136,7 @@ function lockUIWithPrize(prize) {
 function spin() {
   if (spinning) return;
 
+  // 已转过：直接锁
   if (localStorage.getItem(STORAGE_KEY) === "1") {
     lockUIWithPrize(localStorage.getItem(WIN_KEY) || "（已抽奖）");
     return;
@@ -161,7 +149,7 @@ function spin() {
   const winnerIndex = pickIndexByWeight(weights);
   const target = angleToIndex(winnerIndex);
 
-  const extraSpins = 7 + Math.floor(Math.random() * 2); // 7~8圈
+  const extraSpins = 7 + Math.floor(Math.random() * 2);
   const finalRotation = target + extraSpins * Math.PI * 2;
 
   const startRotation = rotation;
@@ -183,6 +171,7 @@ function spin() {
       requestAnimationFrame(animate);
     } else {
       spinning = false;
+
       rotation = ((rotation % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2);
       drawWheel();
 
