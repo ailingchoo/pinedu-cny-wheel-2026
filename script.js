@@ -120,25 +120,6 @@ function drawWheel() {
   ctx.font = "700 11px system-ui, sans-serif";
   ctx.fillText("只限一次抽奖", 0, 86);
 
-  // ====== 外圈小装饰：四个🐴（让它更“马年”）======
-  ctx.save();
-  ctx.rotate(0);
-  ctx.fillStyle = "rgba(255,255,255,.85)";
-  ctx.font = "18px system-ui, sans-serif";
-  const decoR = radius - 18;
-  const positions = [0, Math.PI/2, Math.PI, 3*Math.PI/2];
-  for (const a of positions) {
-    ctx.save();
-    ctx.rotate(a);
-    ctx.textAlign = "center";
-    ctx.fillText("🐴", 0, -decoR);
-    ctx.restore();
-  }
-  ctx.restore();
-
-  ctx.restore();
-}
-
 // ====== 权重抽奖 ======
 function pickIndexByWeight(ws) {
   const total = ws.reduce((a, b) => a + b, 0);
