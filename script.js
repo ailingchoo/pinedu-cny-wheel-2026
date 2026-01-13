@@ -50,40 +50,29 @@ function hashToColor(str) {
 }
 
 // =======================
-// 环绕文字：重复铺满整圈（4字反复）
+// 环绕文字：只画一次（4字绕一圈）
 // =======================
-function drawCircularRepeatText(baseText, x, y, r) {
+function drawCircularOnce(text, x, y, r, startAngle = -Math.PI / 2) {
   ctx.save();
   ctx.translate(x, y);
-
-  // 字体风格（你想更大更霸气：把 14 改 15/16）
   ctx.font = "900 14px system-ui, sans-serif";
   ctx.fillStyle = "rgba(255,255,255,.92)";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  // 让它更像一圈“标志字环”，间距紧一点好看
-  const spacing = 0.22; // 越小越密（0.20~0.26）
-  const totalAngle = Math.PI * 2;
+  const chars = [...text];
+  const step = (Math.PI * 2) / chars.length; // 4个字 = 每90度一个
+  let angle = startAngle;
 
-  // 需要多少个字符才能铺满整圈
-  const chars = [...baseText];
-  const count = Math.ceil(totalAngle / spacing);
-  const repeated = Array.from({ length: count }, (_, i) => chars[i % chars.length]);
-
-  // 从正上方开始
-  let angle = -Math.PI / 2;
-
-  for (const ch of repeated) {
+  for (const ch of chars) {
     ctx.save();
     ctx.rotate(angle);
     ctx.translate(0, -r);
-    ctx.rotate(-angle); // 保持字正向
+    ctx.rotate(-angle);
     ctx.fillText(ch, 0, 0);
     ctx.restore();
-    angle += spacing;
+    angle += step;
   }
-
   ctx.restore();
 }
 
@@ -126,7 +115,7 @@ function drawWheel() {
   }
 
   // =======================
-  // 高级中心区域（大圆 + 金框 + 发光 + 环绕字）
+  // 高级中心区域（大圆 + 金框 + 发光）
   // =======================
   const centerR = 92;
   const logoClipR = 54;
@@ -167,9 +156,9 @@ function drawWheel() {
   } catch (e) {}
   ctx.restore();
 
-  // ✅ 环绕字：4字“马年好运”重复铺满整圈
-  // r = 72 控制字离 logo 的距离（想更贴近：68；想更外圈：76）
-  drawCircularRepeatText("马年好运", 0, logoY, 72);
+  // ✅ 只出现一次「马年好运」围绕 logo
+  // r 控制距离：68更贴近，74更外圈
+  drawCircularOnce("马年好运", 0, logoY, 72, -Math.PI / 2);
 
   ctx.restore();
 }
@@ -255,4 +244,5 @@ drawWheel();
 if (localStorage.getItem(STORAGE_KEY) === "1") {
   lockUI(localStorage.getItem(WIN_KEY) || "");
 }
+
 
