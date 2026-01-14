@@ -10,8 +10,8 @@ const wheelLabels = ["RM8", "RM18", "RM28", "RM58", "RM88 🏆大奖"];
 // =======================
 // 只能转一次
 // =======================
-const STORAGE_KEY = "PINEDU_WHEEL_SPUN_OK";
-const WIN_KEY = "PINEDU_WHEEL_WIN_OK";
+const STORAGE_KEY = "PINEDU_WHEEL_SPUN_OK_V2";
+const WIN_KEY = "PINEDU_WHEEL_WIN_OK_V2";
 
 // =======================
 // Canvas
@@ -48,7 +48,7 @@ function hashToColor(str) {
 }
 
 // =======================
-// 中心区域（你之前 OK 的比例）
+// 中心区域（修好：先画Logo再画字）
 // =======================
 function drawCenter() {
   const centerR = 76;
@@ -69,14 +69,7 @@ function drawCenter() {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // 马年好运（回到小一号）
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "900 18px system-ui";
-  ctx.fillStyle = "rgba(255,255,255,.95)";
-  ctx.fillText("马年好运", 0, -28);
-
-  // Logo
+  // ✅ Logo（先画，避免挡字）
   ctx.save();
   ctx.beginPath();
   ctx.arc(0, logoY, logoR, 0, Math.PI * 2);
@@ -91,6 +84,13 @@ function drawCenter() {
     );
   } catch {}
   ctx.restore();
+
+  // ✅ 马年好运（最后画，永远在最上层）
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "900 18px system-ui";
+  ctx.fillStyle = "rgba(255,255,255,.95)";
+  ctx.fillText("马年好运", 0, -28);
 }
 
 // =======================
@@ -132,11 +132,13 @@ function drawWheel() {
     ctx.closePath();
     ctx.fillStyle = hashToColor(wheelLabels[i]);
     ctx.fill();
+
     ctx.strokeStyle = "rgba(255,255,255,.7)";
     ctx.lineWidth = 2;
     ctx.stroke();
   }
 
+  // 中心 + 文字（中心先画，奖项文字最后画）
   drawCenter();
   drawLabels();
 
@@ -170,6 +172,7 @@ function lockUI(prize) {
 
 function spin() {
   if (spinning) return;
+
   if (localStorage.getItem(STORAGE_KEY)) {
     lockUI(localStorage.getItem(WIN_KEY));
     return;
@@ -190,6 +193,7 @@ function spin() {
     const p = Math.min(1, (t - t0) / 4200);
     rotation = start + delta * (1 - Math.pow(1 - p, 3));
     drawWheel();
+
     if (p < 1) requestAnimationFrame(animate);
     else {
       spinning = false;
@@ -199,12 +203,14 @@ function spin() {
       lockUI(prize);
     }
   }
+
   requestAnimationFrame(animate);
 }
 
 spinBtn.addEventListener("click", spin);
-drawWheel();
 
+// 初始载入
+drawWheel();
 if (localStorage.getItem(STORAGE_KEY)) {
   lockUI(localStorage.getItem(WIN_KEY));
 }
