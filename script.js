@@ -90,7 +90,7 @@ function drawCenter() {
   ctx.textBaseline = "middle";
   ctx.font = "900 18px system-ui";
   ctx.fillStyle = "rgba(255,255,255,.95)";
-  ctx.fillText("马年好运", 0, -28);
+  ctx.fillText("马年好运", 0, -46);
 }
 
 // =======================
