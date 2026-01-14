@@ -2,16 +2,16 @@
 // 奖项 & 权重
 // =======================
 const prizes = ["RM8", "RM18", "RM28", "RM58", "RM88 🏆大奖"];
-const weights = [45, 30, 15, 8, 2]; // RM88 很难中
+const weights = [45, 30, 15, 8, 2];
 
-// ✅ 轮盘上也显示完整版（你要 RM88 后面字回来）
+// 扇形显示（完整版）
 const wheelLabels = ["RM8", "RM18", "RM28", "RM58", "RM88 🏆大奖"];
 
 // =======================
 // 只能转一次
 // =======================
-const STORAGE_KEY = "PINEDU_WHEEL_SPUN_FINAL_V4";
-const WIN_KEY = "PINEDU_WHEEL_WIN_FINAL_V4";
+const STORAGE_KEY = "PINEDU_WHEEL_SPUN_OK";
+const WIN_KEY = "PINEDU_WHEEL_WIN_OK";
 
 // =======================
 // Canvas
@@ -25,7 +25,7 @@ const W = canvas.width;
 const H = canvas.height;
 const cx = W / 2;
 const cy = H / 2;
-const radius = Math.min(W, H) / 2 - 6;
+const radius = Math.min(W, H) / 2 - 8;
 
 let rotation = 0;
 let spinning = false;
@@ -39,7 +39,7 @@ logoImg.onload = () => drawWheel();
 logoImg.onerror = () => drawWheel();
 
 // =======================
-// 扇形颜色
+// 颜色
 // =======================
 function hashToColor(str) {
   let h = 0;
@@ -48,32 +48,13 @@ function hashToColor(str) {
 }
 
 // =======================
-// 描边文字（清楚但字小一点）
+// 中心区域（你之前 OK 的比例）
 // =======================
-function drawTextOutlined(text, x, y, fontSize = 18) {
-  ctx.save();
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-  ctx.font = `900 ${fontSize}px system-ui`;
-
-  ctx.shadowColor = "rgba(0,0,0,.25)";
-  ctx.shadowBlur = 4;
-
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = "rgba(255,255,255,.85)";
-  ctx.strokeText(text, x, y);
-
-  ctx.fillStyle = "#111827";
-  ctx.fillText(text, x, y);
-  ctx.restore();
-}
-
 function drawCenter() {
-  // ✅ 中心保持不挡字：稍小
-  const centerR = 70;
-  const logoR = 46;
-  const logoSize = 92;
-  const logoY = 12;
+  const centerR = 76;
+  const logoR = 48;
+  const logoSize = 96;
+  const logoY = 8;
 
   // 底圆
   ctx.beginPath();
@@ -81,37 +62,19 @@ function drawCenter() {
   ctx.fillStyle = "rgba(17,24,39,.92)";
   ctx.fill();
 
-  // 金色发光（淡一点）
-  ctx.save();
-  ctx.shadowColor = "rgba(255,215,120,.5)";
-  ctx.shadowBlur = 14;
-  ctx.beginPath();
-  ctx.arc(0, 0, centerR + 2, 0, Math.PI * 2);
-  ctx.strokeStyle = "rgba(255,215,120,.5)";
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  ctx.restore();
-
-  // 金色边框
+  // 金边
   ctx.beginPath();
   ctx.arc(0, 0, centerR, 0, Math.PI * 2);
-  ctx.strokeStyle = "rgba(255,210,110,.95)";
+  ctx.strokeStyle = "rgba(255,210,110,.9)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // ✅ 马年好运：字小一点
-  ctx.save();
+  // 马年好运（回到小一号）
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "900 20px system-ui"; // 原本 26，改小
-  ctx.shadowColor = "rgba(0,0,0,.45)";
-  ctx.shadowBlur = 6;
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "rgba(0,0,0,.5)";
-  ctx.strokeText("马年好运", 0, -28);
-  ctx.fillStyle = "rgba(255,255,255,.98)";
+  ctx.font = "900 18px system-ui";
+  ctx.fillStyle = "rgba(255,255,255,.95)";
   ctx.fillText("马年好运", 0, -28);
-  ctx.restore();
 
   // Logo
   ctx.save();
@@ -119,32 +82,41 @@ function drawCenter() {
   ctx.arc(0, logoY, logoR, 0, Math.PI * 2);
   ctx.clip();
   try {
-    ctx.drawImage(logoImg, -logoSize / 2, logoY - logoSize / 2, logoSize, logoSize);
+    ctx.drawImage(
+      logoImg,
+      -logoSize / 2,
+      logoY - logoSize / 2,
+      logoSize,
+      logoSize
+    );
   } catch {}
   ctx.restore();
 }
 
-function drawLabelsOnTop() {
+// =======================
+// 奖项文字（最后画，不被挡）
+// =======================
+function drawLabels() {
   const n = wheelLabels.length;
   const arc = (Math.PI * 2) / n;
 
   for (let i = 0; i < n; i++) {
     ctx.save();
     ctx.rotate(i * arc + arc / 2);
-
-    // ✅ 字小一点 + 更靠外一点（避免长字被挡）
-    drawTextOutlined(wheelLabels[i], radius - 2, 7, 18);
-
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.font = "900 17px system-ui";
+    ctx.fillStyle = "#111827";
+    ctx.fillText(wheelLabels[i], radius - 6, 6);
     ctx.restore();
   }
 }
 
 // =======================
-// 绘制转盘（关键：文字最后画）
+// 绘制转盘
 // =======================
 function drawWheel() {
   ctx.clearRect(0, 0, W, H);
-
   const n = wheelLabels.length;
   const arc = (Math.PI * 2) / n;
 
@@ -152,7 +124,7 @@ function drawWheel() {
   ctx.translate(cx, cy);
   ctx.rotate(rotation);
 
-  // 1) 扇形底色
+  // 扇形底色
   for (let i = 0; i < n; i++) {
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -160,17 +132,13 @@ function drawWheel() {
     ctx.closePath();
     ctx.fillStyle = hashToColor(wheelLabels[i]);
     ctx.fill();
-
     ctx.strokeStyle = "rgba(255,255,255,.7)";
     ctx.lineWidth = 2;
     ctx.stroke();
   }
 
-  // 2) 中心
   drawCenter();
-
-  // 3) 最后画奖项文字（最上层）
-  drawLabelsOnTop();
+  drawLabels();
 
   ctx.restore();
 }
@@ -202,7 +170,6 @@ function lockUI(prize) {
 
 function spin() {
   if (spinning) return;
-
   if (localStorage.getItem(STORAGE_KEY)) {
     lockUI(localStorage.getItem(WIN_KEY));
     return;
@@ -213,7 +180,7 @@ function spin() {
   resultText.textContent = "转盘旋转中…";
 
   const win = pickIndexByWeight(weights);
-  const target = angleToIndex(win) + (7 + Math.floor(Math.random() * 2)) * Math.PI * 2;
+  const target = angleToIndex(win) + 7 * Math.PI * 2;
 
   const start = rotation;
   const delta = target - start;
@@ -226,7 +193,7 @@ function spin() {
     if (p < 1) requestAnimationFrame(animate);
     else {
       spinning = false;
-      const prize = prizes[win]; // ✅ 结果显示完整版
+      const prize = prizes[win];
       localStorage.setItem(STORAGE_KEY, "1");
       localStorage.setItem(WIN_KEY, prize);
       lockUI(prize);
